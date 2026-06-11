@@ -33,7 +33,6 @@ def teamsFilter(df):
         hdsd = df.iloc[i]["HDSD"]
         aGD = df.iloc[i]["AGD"]
         teams.append(Team(teamName, xGD, xGP, giveawayDifferential, hdsd, aGD))  
-    teams.sort(key=lambda t: t.calcPowerScore(statsMap), reverse=True)
     return teams, statsMap
 def playersFilter(df):
     df = df[df["situation"] == "all"]
@@ -61,5 +60,4 @@ def playersFilter(df):
         hDSD = df.iloc[i]["HDSD"]
         aGD = df.iloc[i]["AGD"]
         players.append(Player(playerName, xGP, xGD, pPG, gD, hDSD, aGD))
-    players.sort(key=lambda p: p.calcPowerScore(statsMap), reverse=True)
     return players, statsMap
