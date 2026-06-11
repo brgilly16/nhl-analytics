@@ -6,7 +6,6 @@ def readAndClean(filepath):
     try:
         df = pd.read_csv(filepath)
         df = df.drop_duplicates().dropna()
-        print("File read and cleaned successfully!")
         return df
     except FileNotFoundError:
         print("File is not found!")
