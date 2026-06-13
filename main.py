@@ -23,7 +23,7 @@ def getArgs():
     parser.add_argument(
         "--plot",
         type = str.lower,
-        choices = ["yes","no"],
+        choices = ["yes", "no"],
         default = "yes"
     )
     return parser.parse_args()
@@ -34,6 +34,9 @@ def main():
     season = args.season
     plot = args.plot
     test = False
+    if top == None or top <= 0:
+        print("Please enter a valid top. Top should be greater than 0.")
+        return
     if plot == "yes":
         test = True
     if mode in ["teams", "all"]:
