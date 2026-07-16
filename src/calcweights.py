@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import r2_score
 def calcWeightsTeam(df):
     X = df[["XGD", "XGP", "GiveawayDifferential", "HDSD", "AGD"]]
     Y = df[""]
@@ -12,13 +12,13 @@ def calcWeightsTeam(df):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     modelOne = LinearRegression()
-    modelTwo = Ridge()
+    modelTwo = Ridge(alpha=1.0)
     modelOne.fit(X_train_scaled, Y_train)
     modelTwo.fit(X_train_scaled, Y_train)
     predictionsOne = modelOne.predict(X_test_scaled)
     predictionsTwo = modelTwo.predict(X_test_scaled)
-    accOne = accuracy_score(Y_test, predictionsOne)
-    accTwo = accuracy_score(Y_test, predictionsTwo)
+    accOne = r2_score(Y_test, predictionsOne)
+    accTwo = r2_score(Y_test, predictionsTwo)
     if accOne > accTwo:
         weights = {"XGD": modelOne.coef_[0],
                    "XGP": modelOne.coef_[1],
@@ -42,13 +42,13 @@ def calcWeightsPlayer(df):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     modelOne = LinearRegression()
-    modelTwo = Ridge()
+    modelTwo = Ridge(alpha=1.0)
     modelOne.fit(X_train_scaled, Y_train)
     modelTwo.fit(X_train_scaled, Y_train)
     predictionsOne = modelOne.predict(X_test_scaled)
     predictionsTwo = modelTwo.predict(X_test_scaled)
-    accOne = accuracy_score(Y_test, predictionsOne)
-    accTwo = accuracy_score(Y_test, predictionsTwo)
+    accOne = r2_score(Y_test, predictionsOne)
+    accTwo = r2_score(Y_test, predictionsTwo)
     if accOne > accTwo:
         weights = {"XGD": modelOne.coef_[0],
                    "XGP": modelOne.coef_[1],
