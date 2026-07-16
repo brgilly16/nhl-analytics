@@ -8,13 +8,13 @@ class Team:
         self.aGD = aGD
     def getZ(self, value, stats):
         return (value - stats.getMu()) / stats.getSd()
-    def calcPowerScore(self, statsMap):
+    def calcPowerScore(self, statsMap, weights):
         xgdZ = self.getZ(self.xGD, statsMap["XGD"])
         xgpZ = self.getZ(self.xGP, statsMap["XGP"])
         gZ = self.getZ(self.giveawayDifferential, statsMap["GiveawayDifferential"])
         hZ = self.getZ(self.hdsd, statsMap["HDSD"])
         aZ = self.getZ(self.aGD, statsMap["AGD"])
-        powerScore = 0.15 * xgdZ + 0.05 * xgpZ + 0.2 * gZ + 0.3 * hZ + 0.3 * aZ
+        powerScore = weights["XGD"] * xgdZ + weights["XGP"] * xgpZ + weights["GiveawayDifferential"] * gZ + weights["HDSD"] * hZ + weights["AGD"] * aZ
         return powerScore
     def __str__(self):
         return self.name

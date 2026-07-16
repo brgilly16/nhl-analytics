@@ -2,6 +2,8 @@ import pandas as pd
 from src.stats import Stats
 from src.team import Team
 from src.player import Player
+from src.calcweights import calcWeightsTeam
+from src.calcweights import calcWeightsPlayer
 def readAndClean(filepath):
     try:
         df = pd.read_csv(filepath)
@@ -23,6 +25,7 @@ def teamsFilter(df):
         "XGP": Stats("xGoalsPercentage", df),
         "AGD": Stats("AGD", df)
     }
+    weights = calcWeightsTeam(df)
     teams = []
     for i in range(len(df)):
         teamName = df.iloc[i]["team"]
@@ -32,7 +35,7 @@ def teamsFilter(df):
         hdsd = df.iloc[i]["HDSD"]
         aGD = df.iloc[i]["AGD"]
         teams.append(Team(teamName, xGD, xGP, giveawayDifferential, hdsd, aGD))  
-    return teams, statsMap
+    return teams, statsMap, weights
 def playersFilter(df):
     df = df[df["situation"] == "all"]
     df["XGP"] = df["onIce_xGoalsPercentage"] / df["games_played"] - df["offIce_xGoalsPercentage"] / df["games_played"]
@@ -49,6 +52,7 @@ def playersFilter(df):
         "HDSD": Stats("HDSD", df),
         "AGD": Stats("AGD", df)
     }
+    weights = calcWeightsPlayer(df)
     players = []
     for i in range(len(df)):
         playerName = df.iloc[i]["name"]
@@ -59,4 +63,4 @@ def playersFilter(df):
         hDSD = df.iloc[i]["HDSD"]
         aGD = df.iloc[i]["AGD"]
         players.append(Player(playerName, xGP, xGD, pPG, gD, hDSD, aGD))
-    return players, statsMap
+    return players, statsMap, weights
