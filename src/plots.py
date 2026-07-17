@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
-def plotRankings(items, statsMap, top = None, title = "Rankings"):
+def plotRankings(items, statsMap, weights, top = None, title = "Rankings"):
     names = []
     scores = []
     for item in items:
         names.append(item.name)
-        scores.append(item.calcPowerScore(statsMap))
+        scores.append(item.calcPowerScore(statsMap, weights))
     if top:
         names = names[0:top]
         scores = scores[0:top]

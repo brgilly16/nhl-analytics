@@ -1,18 +1,18 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import RidgeCV
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 def calcWeightsTeam(df):
-    X = df[["XGD", "XGP", "GiveawayDifferential", "HDSD", "AGD"]]
-    Y = df[""]
+    X = df[["XGD", "xGoalsPercentage", "GiveawayDifferential", "HDSD", "AGD"]]
+    Y = df["PTS%"]
     X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     modelOne = LinearRegression()
-    modelTwo = Ridge(alpha=1.0)
+    modelTwo = RidgeCV(alphas=[0.001, 0.01, 0.1, 1, 10, 100])
     modelOne.fit(X_train_scaled, Y_train)
     modelTwo.fit(X_train_scaled, Y_train)
     predictionsOne = modelOne.predict(X_test_scaled)
@@ -26,6 +26,7 @@ def calcWeightsTeam(df):
                     "HDSD": modelOne.coef_[3],
                     "AGD": modelOne.coef_[4]
         }
+        print("modelOne chosen")
     else:
         weights = {"XGD": modelTwo.coef_[0],
                    "XGP": modelTwo.coef_[1],
@@ -33,6 +34,9 @@ def calcWeightsTeam(df):
                     "HDSD": modelTwo.coef_[3],
                     "AGD": modelTwo.coef_[4]
         }
+        print("modelTwo chosen")
+    print(weights)
+    print(accOne, accTwo)
     return weights
 def calcWeightsPlayer(df):
     X = df[["XGD", "XGP", "PPG", "GD", "HDSD", "AGD"]]
@@ -42,7 +46,7 @@ def calcWeightsPlayer(df):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     modelOne = LinearRegression()
-    modelTwo = Ridge(alpha=1.0)
+    modelTwo = RidgeCV(alpha=1.0)
     modelOne.fit(X_train_scaled, Y_train)
     modelTwo.fit(X_train_scaled, Y_train)
     predictionsOne = modelOne.predict(X_test_scaled)
