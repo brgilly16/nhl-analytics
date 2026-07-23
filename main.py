@@ -1,7 +1,7 @@
 import argparse
 from src.data import readAndClean, teamsFilter, playersFilter
-from src.ranking import printRankings, rankItems  
-from src.plots import plotRankings
+from src.ranking import printPlayers, rankPlayers, rankItems, printRankings
+from src.plots import plotRankings, plotPlayers
 from src.calcweights import calcWeightsTeam, calcWeightsPlayer
 def getArgs():
     parser = argparse.ArgumentParser()
@@ -25,7 +25,7 @@ def getArgs():
         "--plot",
         type = str.lower,
         choices = ["yes", "no"],
-        default = "yes"
+        default = "no"
     )
     return parser.parse_args()
 def main():
@@ -56,16 +56,16 @@ def main():
                 plotRankings(itemsR, statsMapR, weights, top = top, title = "Regular Season Teams")
     if mode in ["players", "all"]:
         if season in ["playoffs", "all"]:
-            playersP, statsMapPlayoffPlayers, weights = playersFilter(readAndClean("data/skaters.csv"))
-            itemsPP = rankItems(playersP, statsMapPlayoffPlayers, weights)
-            printRankings(itemsPP, statsMapPlayoffPlayers, weights, top)
+            playersP, model, scaler, featureNames = playersFilter(readAndClean("data/skaters.csv"))
+            itemsPP = rankPlayers(playersP, model, scaler, featureNames)
+            printPlayers(itemsPP, model, scaler, featureNames, top)
             if test:
-                plotRankings(itemsPP, statsMapPlayoffPlayers, weights, top = top, title = "Playoff Players")
+                plotPlayers(itemsPP, model, scaler, featureNames, top = top, title = "Playoff Players")
         if season in ["regular", "all"]:
-            playersR, statsMapPlayers, weights = playersFilter(readAndClean("data/skaters (1).csv"))
-            itemsPR = rankItems(playersR, statsMapPlayers, weights)
-            printRankings(itemsPR, statsMapPlayers, weights, top)
+            playersR, model, scaler, featureNames = playersFilter(readAndClean("data/skaters (1).csv"))
+            itemsPR = rankPlayers(playersR, model, scaler, featureNames)
+            printPlayers(itemsPR, model, scaler, featureNames, top)
             if test:
-                plotRankings(itemsPR, statsMapPlayers, weights, top = top, title = "Regular Season Players")
+                plotPlayers(itemsPR, model, scaler, featureNames, top = top, title = "Regular Season Players")
 if __name__ == "__main__":
     main()

@@ -42,34 +42,45 @@ def teamsFilter(df):
     return teams, statsMap, teamWeights
 def playersFilter(df):
     df = df[df["situation"] == "all"]
-    df["XGP"] = df["onIce_xGoalsPercentage"] / df["games_played"] - df["offIce_xGoalsPercentage"] / df["games_played"]
-    df["XGD"] = df["OnIce_F_xGoals"] / df["games_played"] - df["OnIce_A_xGoals"] / df["games_played"]
-    df["PPG"] = df["I_F_points"] / df["games_played"]
-    df["GD"] = df["I_F_takeaways"] / df["games_played"] - df["I_F_giveaways"] / df["games_played"]
-    df["HDSD"] = df["OnIce_F_highDangerShots"] / df["games_played"] - df["OnIce_A_highDangerShots"] / df["games_played"]
-    df["AGD"] = df["OnIce_F_goals"] / df["games_played"] -df["OnIce_A_goals"] / df["games_played"]
-    statsMap = {
-        "XGP": Stats("XGP", df),
-        "XGD": Stats("XGD", df),
-        "PPG": Stats("PPG", df),
-        "GD": Stats("GD", df),
-        "HDSD": Stats("HDSD", df),
-        "AGD": Stats("AGD", df)
-    }
-    table = downloadGar()
-    df = df.merge(table, left_on = ["season", "name"], right_on = ["Season","Player"], how = "left")
-    df = df.dropna(subset=["GAR"])
-    df = df[df["games_played"] > 20]
-    print(df.columns.tolist())
-    playerWeights = calcWeightsPlayer(df)
+    perGameColumns = [
+        "OnIce_F_goals",
+        "OnIce_A_goals",
+        "OnIce_F_xGoals",
+        "OnIce_A_xGoals",
+        "OnIce_F_shotsOnGoal",
+        "OnIce_A_shotsOnGoal",
+        "OnIce_F_shotAttempts",
+        "OnIce_A_shotAttempts",
+        "OnIce_F_unblockedShotAttempts",
+        "OnIce_A_unblockedShotAttempts",
+        "OnIce_F_highDangerShots",
+        "OnIce_A_highDangerShots",
+        "I_F_goals",
+        "I_F_primaryAssists",
+        "I_F_secondaryAssists",
+        "I_F_points",
+        "I_F_shotsOnGoal",
+        "I_F_shotAttempts",
+        "I_F_unblockedShotAttempts",
+        "I_F_missedShots",
+        "I_F_blockedShotAttempts",
+        "I_F_takeaways",
+        "I_F_giveaways",
+        "I_F_hits",
+        "I_F_rebounds",
+        "I_F_reboundGoals",
+        "I_F_savedShotsOnGoal"
+    ]
+    for column in perGameColumns:
+        if column in df.columns:
+            df[column] = df[column] / df["games_played"]
+    model, scaler, featureNames = calcWeightsPlayer()
     players = []
     for i in range(len(df)):
-        playerName = df.iloc[i]["name"]
-        xGP = df.iloc[i]["XGP"]
-        xGD = df.iloc[i]["XGD"]
-        pPG = df.iloc[i]["PPG"]
-        gD = df.iloc[i]["GD"]
-        hDSD = df.iloc[i]["HDSD"]
-        aGD = df.iloc[i]["AGD"]
-        players.append(Player(playerName, xGP, xGD, pPG, gD, hDSD, aGD))
-    return players, statsMap, playerWeights
+        row = df.iloc[i]
+        playerName = row["name"]
+        stats = {}
+        for feature in featureNames:
+            stats[feature] = row[feature]
+        players.append(Player(playerName, stats))
+    return players, model, scaler, featureNames

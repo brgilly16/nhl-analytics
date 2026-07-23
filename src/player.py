@@ -1,22 +1,12 @@
+import pandas as pd
 class Player:
-    def __init__(self, name, xGPD, xGD, pPG, giveawayDifferential, hdsd, aGD):
+    def __init__(self, name, stats):
         self.name = name
-        self.xGD = xGD
-        self.xGPD = xGPD
-        self.pPG = pPG
-        self.giveawayDifferential = giveawayDifferential
-        self.hdsd = hdsd
-        self.aGD = aGD
-    def getZ(self, value, stats):
-        return (value - stats.getMu()) / stats.getSd()
-    def calcPowerScore(self, statsMap, weights):
-        xgdZ = self.getZ(self.xGD, statsMap["XGD"])
-        xgpZ = self.getZ(self.xGPD, statsMap["XGP"])
-        pZ = self.getZ(self.pPG, statsMap["PPG"])
-        gZ = self.getZ(self.giveawayDifferential, statsMap["GD"])
-        hZ = self.getZ(self.hdsd, statsMap["HDSD"])
-        aZ = self.getZ(self.aGD, statsMap["AGD"])
-        powerScore = weights["XGD"] * xgdZ + weights["XGP"] * xgpZ + weights["PPG"] * pZ + weights["GD"] * gZ + weights["HDSD"] * hZ + weights["AGD"] * aZ
-        return powerScore
+        self.stats = stats
+    def calcPowerScore(self, model, scaler, featureNames):
+        values = pd.DataFrame([self.stats])
+        values = values[featureNames]
+        values = scaler.transform(values)
+        return model.predict(values)[0]
     def __str__(self):
         return self.name
