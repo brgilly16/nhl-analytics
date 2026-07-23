@@ -16,7 +16,7 @@ class Player:
         gZ = self.getZ(self.giveawayDifferential, statsMap["GD"])
         hZ = self.getZ(self.hdsd, statsMap["HDSD"])
         aZ = self.getZ(self.aGD, statsMap["AGD"])
-        powerScore = weights["XGD"] * xgdZ + weights["XGP"] * xgpZ + weights["PPG"] * pZ + weights["GiveawayDifferential"] * gZ + weights["HDSD"] * hZ + weights["AGD"] * aZ
+        powerScore = weights["XGD"] * xgdZ + weights["XGP"] * xgpZ + weights["PPG"] * pZ + weights["GD"] * gZ + weights["HDSD"] * hZ + weights["AGD"] * aZ
         return powerScore
     def __str__(self):
         return self.name
