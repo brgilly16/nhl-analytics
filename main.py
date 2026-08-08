@@ -1,8 +1,7 @@
 import argparse
 from src.data import readAndClean, teamsFilter, playersFilter
-from src.ranking import printPlayers, rankPlayers, rankItems, printRankings
-from src.plots import plotRankings, plotPlayers
-from src.calcweights import calcWeightsTeam, calcWeightsPlayer
+from src.ranking import rankItems, printItems
+from src.plots import plotItems
 def getArgs():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -35,7 +34,6 @@ def main():
     season = args.season
     plot = args.plot
     test = False
-    weights = []
     if top != None and top <= 0:
         print("Please enter a valid top. Top should be greater than 0.")
         return
@@ -43,29 +41,29 @@ def main():
         test = True
     if mode in ["teams", "all"]:
         if season in ["playoffs", "all"]:
-            teamsP, statsMapP, weights  = teamsFilter(readAndClean("data/teams (1).csv"))
-            itemsP = rankItems(teamsP, statsMapP, weights)
-            printRankings(itemsP, statsMapP, weights, top)
+            teamsP, model, scaler, featureNames  = teamsFilter(readAndClean("data/teams (1).csv"))
+            itemsP = rankItems(teamsP, model, scaler, featureNames)
+            printItems(itemsP, model, scaler, featureNames, top)
             if test:
-                plotRankings(itemsP, statsMapP, weights, top = top, title = "Playoff Teams")
+                plotItems(itemsP, model, scaler, featureNames, top = top, title = "Playoff Teams")
         if season in ["regular", "all"]:
-            teamsR, statsMapR, weights = teamsFilter(readAndClean("data/teams.csv"))
-            itemsR = rankItems(teamsR, statsMapR, weights)
-            printRankings(itemsR, statsMapR, weights, top)
+            teamsR, model, scaler, featureNames = teamsFilter(readAndClean("data/teams.csv"))
+            itemsR = rankItems(teamsR, model, scaler, featureNames)
+            printItems(itemsR, model, scaler, featureNames, top)
             if test:
-                plotRankings(itemsR, statsMapR, weights, top = top, title = "Regular Season Teams")
+                plotItems(itemsR, model, scaler, featureNames, top = top, title = "Regular Season Teams")
     if mode in ["players", "all"]:
         if season in ["playoffs", "all"]:
             playersP, model, scaler, featureNames = playersFilter(readAndClean("data/skaters.csv"))
-            itemsPP = rankPlayers(playersP, model, scaler, featureNames)
-            printPlayers(itemsPP, model, scaler, featureNames, top)
+            itemsPP = rankItems(playersP, model, scaler, featureNames)
+            printItems(itemsPP, model, scaler, featureNames, top)
             if test:
-                plotPlayers(itemsPP, model, scaler, featureNames, top = top, title = "Playoff Players")
+                plotItems(itemsPP, model, scaler, featureNames, top = top, title = "Playoff Players")
         if season in ["regular", "all"]:
             playersR, model, scaler, featureNames = playersFilter(readAndClean("data/skaters (1).csv"))
-            itemsPR = rankPlayers(playersR, model, scaler, featureNames)
-            printPlayers(itemsPR, model, scaler, featureNames, top)
+            itemsPR = rankItems(playersR, model, scaler, featureNames)
+            printItems(itemsPR, model, scaler, featureNames, top)
             if test:
-                plotPlayers(itemsPR, model, scaler, featureNames, top = top, title = "Regular Season Players")
+                plotItems(itemsPR, model, scaler, featureNames, top = top, title = "Regular Season Players")
 if __name__ == "__main__":
     main()

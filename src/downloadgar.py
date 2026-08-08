@@ -1,6 +1,6 @@
 import pandas as pd
 def downloadGar():
-    df = pd.read_csv(r"C:\Users\brgil\Downloads\EH_gar_sk_stats_regular_2026-07-23.csv")
+    df = pd.read_csv("data/EH_gar_sk_stats_regular_2026-07-23.csv")
     yearsMap = {
     "10-11": 2010,
     "11-12": 2011,

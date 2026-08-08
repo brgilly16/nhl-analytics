@@ -1,9 +1,7 @@
 import pandas as pd
-from src.stats import Stats
 from src.team import Team
 from src.player import Player
 from src.downloadstandings import downloadStandings
-from src.downloadgar import downloadGar
 from src.calcweights import calcWeightsTeam
 from src.calcweights import calcWeightsPlayer
 def readAndClean(filepath):
@@ -20,26 +18,16 @@ def teamsFilter(df):
     df["GiveawayDifferential"] = df["giveawaysAgainst"] / df["games_played"] - df["giveawaysFor"] / df["games_played"]
     df["HDSD"] = df["highDangerShotsFor"] / df["games_played"] - df["highDangerShotsAgainst"] / df["games_played"]
     df["AGD"] = df["goalsFor"] / df["games_played"] - df["goalsAgainst"] / df["games_played"]
-    table = downloadStandings()
-    df = df.merge(table, left_on = "team", right_on = "Team", how = "left")
-    statsMap = {
-        "XGD": Stats("XGD", df),
-        "GiveawayDifferential": Stats("GiveawayDifferential", df),
-        "HDSD": Stats("HDSD", df),
-        "XGP": Stats("xGoalsPercentage", df),
-        "AGD": Stats("AGD", df)
-    }
+    model, scaler, featureNames = calcWeightsTeam()
     teams = []
     for i in range(len(df)):
-        teamName = df.iloc[i]["team"]
-        xGD = df.iloc[i]["XGD"]
-        xGP = df.iloc[i]["xGoalsPercentage"]
-        giveawayDifferential = df.iloc[i]["GiveawayDifferential"]
-        hdsd = df.iloc[i]["HDSD"]
-        aGD = df.iloc[i]["AGD"]
-        teams.append(Team(teamName, xGD, xGP, giveawayDifferential, hdsd, aGD))  
-    teamWeights = calcWeightsTeam(df)
-    return teams, statsMap, teamWeights
+            row = df.iloc[i]
+            teamName = row["name"]
+            stats = {}
+            for feature in featureNames:
+                stats[feature] = row[feature]
+            teams.append(Team(teamName, stats))
+    return teams, model, scaler, featureNames
 def playersFilter(df):
     df = df[df["situation"] == "all"]
     perGameColumns = [

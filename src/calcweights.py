@@ -1,12 +1,23 @@
 import pandas as pd
 from src.downloadgar import downloadGar
+from src.downloadstandings import downloadStandings
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import RidgeCV
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LassoCV
 from sklearn.metrics import r2_score
-def calcWeightsTeam(df):
+def calcWeightsTeam():
+    df = pd.read_csv("data/teams.csv")
+    df = df.drop_duplicates()
+    df = df.dropna()
+    df = df[df["situation"] == "all"]
+    df["XGD"] = df["xGoalsFor"] / df["games_played"] - df["xGoalsAgainst"] / df["games_played"]
+    df["GiveawayDifferential"] = df["giveawaysAgainst"] / df["games_played"] - df["giveawaysFor"] / df["games_played"]
+    df["HDSD"] = df["highDangerShotsFor"] / df["games_played"] - df["highDangerShotsAgainst"] / df["games_played"]
+    df["AGD"] = df["goalsFor"] / df["games_played"] - df["goalsAgainst"] / df["games_played"]
+    table = downloadStandings()
+    df = df.merge(table, left_on = "team", right_on = "Team", how = "left")
     X = df[["XGD", "xGoalsPercentage", "GiveawayDifferential", "HDSD", "AGD"]]
     Y = df["PTS%"]
     X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
@@ -22,24 +33,14 @@ def calcWeightsTeam(df):
     accOne = r2_score(Y_test, predictionsOne)
     accTwo = r2_score(Y_test, predictionsTwo)
     if accOne > accTwo:
-        weights = {"XGD": modelOne.coef_[0],
-                   "XGP": modelOne.coef_[1],
-                   "GiveawayDifferential": modelOne.coef_[2],
-                    "HDSD": modelOne.coef_[3],
-                    "AGD": modelOne.coef_[4]
-        }
+        bestModel = modelOne
         print("modelOne chosen")
     else:
-        weights = {"XGD": modelTwo.coef_[0],
-                   "XGP": modelTwo.coef_[1],
-                   "GiveawayDifferential": modelTwo.coef_[2],
-                    "HDSD": modelTwo.coef_[3],
-                    "AGD": modelTwo.coef_[4]
-        }
+        bestModel = modelTwo
         print("modelTwo chosen")
-    print(weights)
     print(accOne, accTwo)
-    return weights
+    featureNames = X.columns.tolist()
+    return bestModel, scaler, featureNames
 def calcWeightsPlayer():
     df = pd.read_csv("data/skaters (1).csv")
     df = df.drop_duplicates().dropna()
@@ -95,6 +96,11 @@ def calcWeightsPlayer():
     "Pens_GAR",
     "playerId",
     "name",
+    "games_played",
+    "icetime",
+    "iceTimeRank",
+    "shifts",
+    "timeOnBench",
     "Player",
     "team",
     "Team",
@@ -117,7 +123,7 @@ def calcWeightsPlayer():
     "fenwickAgainstAfterShifts"
     ]
     X = df.drop(columns=exclude)
-    X = X.select_dtypes(include="number")    
+    X = X.select_dtypes(include="number")   
     Y = df["GAR"]
     X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
     scaler = StandardScaler()
