@@ -6,6 +6,7 @@ def plotItems(items, model, scaler, featureNames, top = None, title = "Rankings"
     for item in items:
         names.append(item.name)
         scores.append(item.calcPowerScore(model, scaler, featureNames))
+    # plot the scores using the proper top
     if top:
         names = names[0:top]
         scores = scores[0:top]
@@ -17,6 +18,7 @@ def plotItems(items, model, scaler, featureNames, top = None, title = "Rankings"
         bad = mu - 0.5 * sd 
         terrible = mu - 1.5 * sd
         fig, ax = plt.subplots()
+        # add colored sections based on how many deviations from the mean
         ax.axhspan(elite, max(scores), color="darkgreen", alpha=0.2, label="Elite")
         ax.axhspan(good, elite, color="green", alpha=0.2, label="Good")
         ax.axhspan(average, good, color="yellow", alpha=0.2, label="Average")

@@ -8,22 +8,29 @@ from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import LassoCV
 from sklearn.metrics import r2_score
 def calcWeightsTeam():
+    # always use regular season data for the model
     df = pd.read_csv("data/teams.csv")
-    df = df.drop_duplicates()
-    df = df.dropna()
+    # filter df and drop duplicates and NA
+    df = df.drop_duplicates().dropna()
     df = df[df["situation"] == "all"]
+    # create per game columns for stats that require them
     df["XGD"] = df["xGoalsFor"] / df["games_played"] - df["xGoalsAgainst"] / df["games_played"]
     df["GiveawayDifferential"] = df["giveawaysAgainst"] / df["games_played"] - df["giveawaysFor"] / df["games_played"]
     df["HDSD"] = df["highDangerShotsFor"] / df["games_played"] - df["highDangerShotsAgainst"] / df["games_played"]
     df["AGD"] = df["goalsFor"] / df["games_played"] - df["goalsAgainst"] / df["games_played"]
+    # get PTS% column and add it to df through the merge
     table = downloadStandings()
     df = df.merge(table, left_on = "team", right_on = "Team", how = "left")
+    # set features and target
     X = df[["XGD", "xGoalsPercentage", "GiveawayDifferential", "HDSD", "AGD"]]
     Y = df["PTS%"]
     X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
+    # scale data
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
+    # use both linear and ridge regression models and determine which is best via their r2 scores
+    # choose the best r2 score out of the two
     modelOne = LinearRegression()
     modelTwo = RidgeCV(alphas=[0.001, 0.01, 0.1, 1, 10, 100])
     modelOne.fit(X_train_scaled, Y_train)
@@ -40,11 +47,15 @@ def calcWeightsTeam():
         print("modelTwo chosen")
     print(accOne, accTwo)
     featureNames = X.columns.tolist()
+    # return the best model, its scaler, and its features
     return bestModel, scaler, featureNames
 def calcWeightsPlayer():
     df = pd.read_csv("data/skaters (1).csv")
+    # drop duplicates and NA
     df = df.drop_duplicates().dropna()
+    # filter df
     df = df[df["situation"] == "all"]
+    # create per game columns for the stats which require them
     perGameColumns = [
     "OnIce_F_goals",
     "OnIce_A_goals",
@@ -77,10 +88,15 @@ def calcWeightsPlayer():
     for column in perGameColumns:
         if column in df.columns:
             df[column] = df[column] / df["games_played"]
+    # get the GAR stat and add it to df via a left join merge
     table = downloadGar()
     df = df.merge(table, left_on = ["season", "name"], right_on = ["Season","Player"], how = "left")
+    # drop any NA in the GAR column
     df = df.dropna(subset=["GAR"])
+    # filter for players who have played more than 20 games
     df = df[df["games_played"] > 20]
+    # exclude a number of stats which could leak information from the target
+    # exclude stats that are not numerical or are not useful for predicting GAR
     exclude = [
     "GAR",
     "WAR",
@@ -122,13 +138,16 @@ def calcWeightsPlayer():
     "fenwickForAfterShifts",
     "fenwickAgainstAfterShifts"
     ]
+    # set features and target
     X = df.drop(columns=exclude)
     X = X.select_dtypes(include="number")   
     Y = df["GAR"]
     X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.2,random_state=42)
+    # scale data
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
+    # train three separate model types and determine which is best via r2 score
     modelOne = LinearRegression()
     modelTwo = RidgeCV(alphas=[0.001, 0.01, 0.1, 1, 10, 100])
     modelThree = LassoCV(alphas=[0.001, 0.01, 0.1, 1, 10], cv=5, max_iter=1000000, random_state=42)
@@ -141,6 +160,7 @@ def calcWeightsPlayer():
     accOne = r2_score(Y_test, predictionsOne)
     accTwo = r2_score(Y_test, predictionsTwo)
     accThree = r2_score(Y_test, predictionsThree)
+    # select the best model
     if accOne >= accTwo and accOne >= accThree:
         bestModel = modelOne
         print("modelOne chosen")
@@ -152,4 +172,5 @@ def calcWeightsPlayer():
         print("modelThree chosen")
     print(accOne, accTwo, accThree)
     featureNames = X.columns.tolist()
+    # return the best model, its scaler, and its features
     return bestModel, scaler, featureNames

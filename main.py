@@ -3,23 +3,33 @@ from src.data import readAndClean, teamsFilter, playersFilter
 from src.ranking import rankItems, printItems
 from src.plots import plotItems
 def getArgs():
+    # create argumentParser
     parser = argparse.ArgumentParser()
+    # add mode arg to allow users to filter between team stats and player stats or all of them
+    # default set as all to select both types of stats
     parser.add_argument(
         "--mode", 
         type = str.lower,
         choices = ["teams", "players", "all"],
         default = "all")
+    # add top arg to allow users to filter for how many players/teams they want to rank
+    # example would be --top 15 (rank top 15 players/teams)
+    # default set as None to rank all players
     parser.add_argument(
         "--top",
         type = int,
         default = None 
     )
+    # add season arg to allow users to filter regular season, playoffs, or all
+    # default set as all to select both seasons
     parser.add_argument(
         "--season",
         type = str.lower,
         choices = ["regular", "playoffs", "all"],
         default = "all"
     )
+    # add plot arg to allow users to request a scatter plot of the rankings
+    # default set as no to not plot the rankings
     parser.add_argument(
         "--plot",
         type = str.lower,
@@ -34,11 +44,13 @@ def main():
     season = args.season
     plot = args.plot
     test = False
+    # validate user input and set boolean for plot arg
     if top != None and top <= 0:
         print("Please enter a valid top. Top should be greater than 0.")
         return
     if plot == "yes":
         test = True
+    # filter for the user requested stat and season and call the proper functions with the correct dataset
     if mode in ["teams", "all"]:
         if season in ["playoffs", "all"]:
             teamsP, model, scaler, featureNames  = teamsFilter(readAndClean("data/teams (1).csv"))
