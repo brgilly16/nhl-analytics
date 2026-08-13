@@ -9,18 +9,26 @@ from sklearn.linear_model import LassoCV
 from sklearn.metrics import r2_score
 def calcWeightsTeam():
     # always use regular season data for the model
-    df = pd.read_csv("data/teams.csv")
-    # filter df and drop duplicates and NA
-    df = df.drop_duplicates().dropna()
+    df = pd.read_csv("data/teams_2008_to_2024.csv")
+    # filter df and drop duplicates
+    df = df.drop_duplicates()
     df = df[df["situation"] == "all"]
     # create per game columns for stats that require them
     df["XGD"] = df["xGoalsFor"] / df["games_played"] - df["xGoalsAgainst"] / df["games_played"]
     df["GiveawayDifferential"] = df["giveawaysAgainst"] / df["games_played"] - df["giveawaysFor"] / df["games_played"]
     df["HDSD"] = df["highDangerShotsFor"] / df["games_played"] - df["highDangerShotsAgainst"] / df["games_played"]
     df["AGD"] = df["goalsFor"] / df["games_played"] - df["goalsAgainst"] / df["games_played"]
+    # fix mismatched team abbreviations with hockey reference data
+    teamMap = {
+        "S.J": "SJS",
+        "N.J": "NJD",
+        "T.B": "TBL",
+        "L.A": "LAK"
+    }
+    df["team"] = df["team"].replace(teamMap)
     # get PTS% column and add it to df through the merge
-    table = downloadStandings()
-    df = df.merge(table, left_on = "team", right_on = "Team", how = "left")
+    standings = downloadStandings()
+    df = df.merge(standings, on = ["team", "season"], how = "left")
     # set features and target
     X = df[["XGD", "xGoalsPercentage", "GiveawayDifferential", "HDSD", "AGD"]]
     Y = df["PTS%"]
