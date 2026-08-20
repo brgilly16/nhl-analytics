@@ -1,4 +1,5 @@
 import pandas as pd
+import time
 def downloadStandings():
     # for loop to get all the standings
     standings = []
@@ -53,4 +54,9 @@ def downloadStandings():
         tableOne = tableOne.rename(columns={"Team":"team"})
         tableOne["season"] = i
         standings.append(tableOne)
-    return pd.concat(standings, ignore_index=True)
+        # avoid triggering hockey reference's rate limit (20 requests/minute) by waiting 5 seconds before re-entering the loop
+        # it is only currently 17 requests needed but in the future with more season data it could end up being more so is important to plan ahead for this
+        time.sleep(5)
+    # get the standings in a csv file
+    standings = pd.concat(standings, ignore_index=True)
+    standings.to_csv("data/standings.csv", index=False)

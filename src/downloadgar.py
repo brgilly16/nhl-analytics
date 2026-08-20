@@ -20,4 +20,5 @@ def downloadGar():
     "25-26": 2025
     }
     df["Season"] = df["Season"].map(yearsMap)
-    return df
+    # get GAR data in a csv file
+    df.to_csv("data/gar.csv", index=False)

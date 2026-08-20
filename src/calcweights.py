@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from src.downloadgar import downloadGar
 from src.downloadstandings import downloadStandings
 from sklearn.model_selection import train_test_split
@@ -27,7 +28,10 @@ def calcWeightsTeam():
     }
     df["team"] = df["team"].replace(teamMap)
     # get PTS% column and add it to df through the merge
-    standings = downloadStandings()
+    # ensure that it only calls downloadStandings() once (in the case that the csv filepath does not exist) and stores the data in a csv with the rest of the project data
+    if not os.path.exists("data/standings.csv"):
+        downloadStandings()
+    standings = pd.read_csv("data/standings.csv")
     df = df.merge(standings, on = ["team", "season"], how = "left")
     # set features and target
     X = df[["XGD", "xGoalsPercentage", "GiveawayDifferential", "HDSD", "AGD"]]
@@ -97,7 +101,10 @@ def calcWeightsPlayer():
         if column in df.columns:
             df[column] = df[column] / df["games_played"]
     # get the GAR stat and add it to df via a left join merge
-    table = downloadGar()
+    # enusre that downloadGar() is only called once that way the data can be stored with the rest of the data for the project
+    if not os.path.exists("data/gar.csv"):
+        downloadGar()
+    table = pd.read_csv("data/gar.csv")
     df = df.merge(table, left_on = ["season", "name"], right_on = ["Season","Player"], how = "left")
     # drop any NA in the GAR column
     df = df.dropna(subset=["GAR"])
