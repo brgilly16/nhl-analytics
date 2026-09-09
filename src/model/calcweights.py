@@ -1,7 +1,7 @@
 import pandas as pd
 import os
-from src.downloadgar import downloadGar
-from src.downloadstandings import downloadStandings
+from src.downloads.downloadgar import downloadGar
+from src.downloads.downloadstandings import downloadStandings
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import RidgeCV

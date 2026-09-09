@@ -1,8 +1,8 @@
 import pandas as pd
-from src.team import Team
-from src.player import Player
-from src.calcweights import calcWeightsTeam
-from src.calcweights import calcWeightsPlayer
+from src.classes.team import Team
+from src.classes.player import Player
+from src.model.calcweights import calcWeightsTeam
+from src.model.calcweights import calcWeightsPlayer
 def readAndClean(filepath):
     # drop duplicates and NA if filepath is found
     try:
@@ -33,7 +33,8 @@ def teamsFilter(df):
                 stats[feature] = row[feature]
             teams.append(Team(teamName, stats)) 
     # return the list, best model, and its scaler and features
-    return teams, model, scaler, featureNames
+    season = df["season"].iloc[0]
+    return teams, model, scaler, featureNames, season
 def playersFilter(df):
     # filter columns
     df = df[df["situation"] == "all"]
@@ -82,4 +83,5 @@ def playersFilter(df):
             stats[feature] = row[feature]
         players.append(Player(playerName, stats))
     # return the list, best model, and its scaler and features
-    return players, model, scaler, featureNames
+    season = df["season"].iloc[0]
+    return players, model, scaler, featureNames, season
