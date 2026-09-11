@@ -81,7 +81,8 @@ def playersFilter(df):
         stats = {}
         for feature in featureNames:
             stats[feature] = row[feature]
-        players.append(Player(playerName, stats))
+        team = row["team"]
+        players.append(Player(playerName, stats, team))
     # return the list, best model, and its scaler and features
     season = df["season"].iloc[0]
     return players, model, scaler, featureNames, season

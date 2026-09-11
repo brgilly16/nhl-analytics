@@ -1,8 +1,9 @@
 import pandas as pd
 class Player:
-    def __init__(self, name, stats):
+    def __init__(self, name, stats, team):
         self.name = name
         self.stats = stats
+        self.team = team
     def calcPowerScore(self, model, scaler, featureNames):
         # get the player's data as a df
         values = pd.DataFrame([self.stats])

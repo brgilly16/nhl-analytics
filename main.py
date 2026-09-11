@@ -3,6 +3,7 @@ from src.model.data import readAndClean, teamsFilter, playersFilter
 from src.rankings.ranking import rankItems, printItems
 from src.rankings.plots import plotItems
 from src.rankings.storerankings import storeRankings
+from src.prediction.prediction import prediction
 def getArgs():
     # create argumentParser
     parser = argparse.ArgumentParser()
@@ -37,6 +38,14 @@ def getArgs():
         choices = ["yes", "no"],
         default = "no"
     )
+    parser.add_argument(
+        "--predict",
+        type = str.lower,
+        choices = ["yes", "no"],
+        default = "no"
+    )
+    parser.add_argument("--home", type=str.upper)
+    parser.add_argument("--away", type=str.upper)
     return parser.parse_args()
 def main():
     args = getArgs()
@@ -44,6 +53,9 @@ def main():
     top = args.top
     season = args.season
     plot = args.plot
+    predict = args.predict
+    home = args.home
+    away = args.away
     test = False
     # validate user input and set boolean for plot arg
     if top != None and top <= 0:
@@ -82,5 +94,7 @@ def main():
             printItems(itemsPR, model, scaler, featureNames, top)
             if test:
                 plotItems(itemsPR, model, scaler, featureNames, top = top, title = "Regular Season Players")
+    if predict == "yes":
+        prediction(home, away)
 if __name__ == "__main__":
     main()

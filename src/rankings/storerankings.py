@@ -1,12 +1,23 @@
 import os
 import pandas as pd
-def storeRankings(items, scores, season, category, time):
+from src.classes.player import Player
+def getTeams(players):
+    teams = []
+    for player in players:
+        teams.append(player.team)
+    return teams
+def storeRankings(items, scores, season,category, time):
+    if isinstance(items[0], Player):
+        teams = getTeams(items)
+    else:
+        teams = [""] * len(items)
     newRankings = pd.DataFrame({
         "name": items,
         "score": scores,
         "season": [season] * len(items),
         "category": [category] * len(items),
-        "time": [time] * len(items)
+        "time": [time] * len(items),
+        "playerTeam": teams
         })
     if not os.path.exists("data/rankings.csv"):
         newRankings.to_csv("data/rankings.csv", index=False)
