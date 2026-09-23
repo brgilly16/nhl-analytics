@@ -1,7 +1,8 @@
 import argparse
-from src.data import readAndClean, teamsFilter, playersFilter
-from src.ranking import rankItems, printItems
-from src.plots import plotItems
+from src.model.data import readAndClean, teamsFilter, playersFilter
+from src.rankings.ranking import rankItems, printItems
+from src.rankings.plots import plotItems
+from src.rankings.storerankings import storeRankings
 def getArgs():
     # create argumentParser
     parser = argparse.ArgumentParser()
@@ -53,27 +54,31 @@ def main():
     # filter for the user requested stat and season and call the proper functions with the correct dataset
     if mode in ["teams", "all"]:
         if season in ["playoffs", "all"]:
-            teamsP, model, scaler, featureNames  = teamsFilter(readAndClean("data/teams (1).csv"))
-            itemsP = rankItems(teamsP, model, scaler, featureNames)
+            teamsP, model, scaler, featureNames, yearP  = teamsFilter(readAndClean("data/teams (1).csv"))
+            itemsP, scoresP = rankItems(teamsP, model, scaler, featureNames)
+            storeRankings(itemsP, scoresP, yearP, "teams", "playoffs")
             printItems(itemsP, model, scaler, featureNames, top)
             if test:
                 plotItems(itemsP, model, scaler, featureNames, top = top, title = "Playoff Teams")
         if season in ["regular", "all"]:
-            teamsR, model, scaler, featureNames = teamsFilter(readAndClean("data/teams.csv"))
-            itemsR = rankItems(teamsR, model, scaler, featureNames)
+            teamsR, model, scaler, featureNames, year = teamsFilter(readAndClean("data/teams.csv"))
+            itemsR, scoresR = rankItems(teamsR, model, scaler, featureNames)
+            storeRankings(itemsR, scoresR, year, "teams", "regular")
             printItems(itemsR, model, scaler, featureNames, top)
             if test:
                 plotItems(itemsR, model, scaler, featureNames, top = top, title = "Regular Season Teams")
     if mode in ["players", "all"]:
         if season in ["playoffs", "all"]:
-            playersP, model, scaler, featureNames = playersFilter(readAndClean("data/skaters.csv"))
-            itemsPP = rankItems(playersP, model, scaler, featureNames)
+            playersP, model, scaler, featureNames, yearP = playersFilter(readAndClean("data/skaters.csv"))
+            itemsPP, scoresPP = rankItems(playersP, model, scaler, featureNames)
+            storeRankings(itemsPP, scoresPP, yearP, "players", "playoffs")
             printItems(itemsPP, model, scaler, featureNames, top)
             if test:
                 plotItems(itemsPP, model, scaler, featureNames, top = top, title = "Playoff Players")
         if season in ["regular", "all"]:
-            playersR, model, scaler, featureNames = playersFilter(readAndClean("data/skaters (1).csv"))
-            itemsPR = rankItems(playersR, model, scaler, featureNames)
+            playersR, model, scaler, featureNames, year = playersFilter(readAndClean("data/skaters (1).csv"))
+            itemsPR, scoresPR = rankItems(playersR, model, scaler, featureNames)
+            storeRankings(itemsPR, scoresPR, year, "players", "regular")
             printItems(itemsPR, model, scaler, featureNames, top)
             if test:
                 plotItems(itemsPR, model, scaler, featureNames, top = top, title = "Regular Season Players")
